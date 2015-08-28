@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import java.lang.reflect.Method;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -829,6 +831,7 @@ public class BluetoothLePlugin extends CordovaPlugin
     connection.put(operationConnect, callbackContext);
 
     BluetoothGatt bluetoothGatt = device.connectGatt(cordova.getActivity().getApplicationContext(), false, new BluetoothGattCallbackExtends());
+    refreshDeviceCache(bluetoothGatt);
 
     connection.put(keyPeripheral, bluetoothGatt);
 
@@ -843,6 +846,20 @@ public class BluetoothLePlugin extends CordovaPlugin
     PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, returnObj);
     pluginResult.setKeepCallback(true);
     callbackContext.sendPluginResult(pluginResult);
+  }
+
+  private boolean refreshDeviceCache(BluetoothGatt gatt){
+    try {
+      BluetoothGatt localBluetoothGatt = gatt;
+      Method localMethod = localBluetoothGatt.getClass().getMethod("refresh", new Class[0]);
+      if (localMethod != null) {
+        boolean bool = ((Boolean) localMethod.invoke(localBluetoothGatt, new Object[0])).booleanValue();
+        return bool;
+      }
+    }
+    catch (Exception localException) {
+    }
+    return false;
   }
 
   private void reconnectAction(JSONArray args, CallbackContext callbackContext)
